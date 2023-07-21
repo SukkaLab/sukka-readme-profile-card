@@ -39,4 +39,5 @@ jobs:
           publish_branch: gh-pages
           publish_dir: public
           cname: github-profile-cards.skk.moe
+          force_orphan: true
           full_commit_message: ${{ env.TIME }}
