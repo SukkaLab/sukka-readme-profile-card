@@ -1,0 +1,42 @@
+name: Update
+
+on:
+  schedule:
+    - cron: 0,30 * * * *
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    name: Fetch stats card img
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run download
+      - name: Get current date
+        run: |
+          echo "TIME=$(date '+%Y-%m-%d %H:%M:%S')" >> ${GITHUB_ENV}
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/master'
+        with:
+          github_token: ${{ secrets.GIT_TOKEN }}
+          user_name: ${{ secrets.GIT_USER }}
+          user_email: ${{ secrets.GIT_EMAIL }}
+          publish_branch: gh-pages
+          publish_dir: public
+          cname: github-profile-cards.skk.moe
+          full_commit_message: ${{ env.TIME }}
