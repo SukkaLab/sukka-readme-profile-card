@@ -11,6 +11,7 @@ baseUrl.searchParams.set('hide_border', 'true');
 baseUrl.searchParams.set('include_all_commits', 'true');
 baseUrl.searchParams.set('hide_title', 'true');
 baseUrl.searchParams.set('count_private', 'true');
+baseUrl.searchParams.set('show', 'reviews', /** reviews,discussions_started,discussions_answered */);
 
 const lightUrl = new URL(baseUrl);
 lightUrl.searchParams.set('icon_color', '586069');
