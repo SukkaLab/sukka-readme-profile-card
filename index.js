@@ -1,7 +1,7 @@
 // @ts-check
 const fs = require('fs');
 const { fetch } = require('undici');
-const pRetry = require('p-retry');
+const retry = require('async-retry');
 const path = require('path');
 
 const baseUrl = new URL('https://github-readme-stats.vercel.app/api');
@@ -39,8 +39,8 @@ const publicDir = path.resolve(__dirname, 'public');
 
 (async () => {
   const [light, dark] = await Promise.all([
-    pRetry(() => fetchSvg(lightUrl), { retries: 30 }),
-    pRetry(() => fetchSvg(darkUrl), { retries: 30 }),
+    retry(() => fetchSvg(lightUrl), { retries: 30 }),
+    retry(() => fetchSvg(darkUrl), { retries: 30 }),
     fs.promises.mkdir(publicDir, { recursive: true })
   ]);
 
