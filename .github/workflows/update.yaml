@@ -26,18 +26,9 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run download
-      - name: Get current date
-        run: |
-          echo "TIME=$(date '+%Y-%m-%d %H:%M:%S')" >> ${GITHUB_ENV}
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master'
+      - uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GIT_TOKEN }}
-          user_name: ${{ secrets.GIT_USER }}
-          user_email: ${{ secrets.GIT_EMAIL }}
-          publish_branch: gh-pages
-          publish_dir: public
-          cname: github-profile-cards.skk.moe
-          force_orphan: true
-          full_commit_message: ${{ env.TIME }}
+          path: public
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v2
