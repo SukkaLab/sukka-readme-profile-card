@@ -38,14 +38,19 @@ const fetchSvg = async (url) => {
 const publicDir = path.resolve(__dirname, 'public');
 
 (async () => {
-  const [light, dark] = await Promise.all([
-    retry(() => fetchSvg(lightUrl), { retries: 30 }),
-    retry(() => fetchSvg(darkUrl), { retries: 30 }),
-    fs.promises.mkdir(publicDir, { recursive: true })
-  ]);
+  try {
+    const [light, dark] = await Promise.all([
+      retry(() => fetchSvg(lightUrl), { retries: 30 }),
+      retry(() => fetchSvg(darkUrl), { retries: 30 }),
+      fs.promises.mkdir(publicDir, { recursive: true })
+    ]);
 
-  await Promise.all([
-    fs.promises.writeFile(path.resolve(publicDir, 'light.svg'), light, { encoding: 'utf-8' }),
-    fs.promises.writeFile(path.resolve(publicDir, 'dark.svg'), dark, { encoding: 'utf-8' })
-  ]);
+    await Promise.all([
+      fs.promises.writeFile(path.resolve(publicDir, 'light.svg'), light, { encoding: 'utf-8' }),
+      fs.promises.writeFile(path.resolve(publicDir, 'dark.svg'), dark, { encoding: 'utf-8' })
+    ]);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
 })();
