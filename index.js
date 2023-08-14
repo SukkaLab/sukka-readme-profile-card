@@ -41,8 +41,8 @@ const publicDir = path.resolve(__dirname, 'public');
 (async () => {
   try {
     const [light, dark] = await Promise.all([
-      retry(() => fetchSvg(lightUrl), { retries: 30 }),
-      retry(() => fetchSvg(darkUrl), { retries: 30 }),
+      retry(() => fetchSvg(lightUrl), { retries: 10 }),
+      retry(() => fetchSvg(darkUrl), { retries: 10 }),
       fs.promises.mkdir(publicDir, { recursive: true })
     ]);
 
