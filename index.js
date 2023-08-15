@@ -26,9 +26,13 @@ darkUrl.searchParams.set('text_color', '8d939d');
  * @param {URL} url
  */
 const fetchSvg = async (url) => {
-  const svg = await fetch(url, {
-    signal: AbortSignal.timeout(60000)
-  }).then(r => r.text());
+  const svg = await fetch(url, { signal: AbortSignal.timeout(10 * 1000) })
+    .then(r => r.text())
+    .catch(e => {
+      console.log('[GitHub README Stats Error]', url.href, e);
+      throw e;
+    });
+
   if (svg.includes('went wrong') || svg.includes('file an issue') || svg.includes('>0</text>')) {
     console.log('[GitHub README Stats Error]', url.href)
     throw new Error('Failed to fetch');
