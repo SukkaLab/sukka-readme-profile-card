@@ -26,6 +26,9 @@ darkUrl.searchParams.set('text_color', '8d939d');
  * @param {URL} url
  */
 const fetchSvg = async (url) => {
+  const random = Math.random().toString(36).slice(2);
+  url.searchParams.set('_cache_busting', random);
+
   const svg = await fetch(url, { signal: AbortSignal.timeout(10 * 1000) })
     .then(r => r.text())
     .catch(e => {
