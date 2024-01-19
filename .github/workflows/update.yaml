@@ -1,6 +1,7 @@
 name: Update
 
 on:
+  push:
   schedule:
     - cron: 0,30 * * * *
 
@@ -13,26 +14,24 @@ jobs:
   fetch:
     name: Fetch stats card img
     runs-on: ubuntu-latest
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
+      contents: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - uses: oven-sh/setup-bun@v1
         with:
-          node-version: 18
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run download
-      - uses: actions/upload-pages-artifact@v1
-        with:
-          path: public
+          bun-version: canary
+      - run: bun i
+      - run: bun run download
       - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v2
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          keep_files: true
+          force_orphan: true
+          publish_branch: dist

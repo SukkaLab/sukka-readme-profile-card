@@ -3,25 +3,21 @@
   "version": "0.0.0",
   "private": true,
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "download": "node index.js"
+    "download": "bun run index.ts"
   },
   "author": "",
-  "devDependencies": {
-    "@types/node": "^20.4.8",
-    "eslint": "^8.45.0",
-    "eslint-config-sukka": "^2.0.2",
-    "eslint-plugin-node": "^11.1.0",
-    "typescript": "^5.1.6"
-  },
   "dependencies": {
     "async-retry": "^1.3.3"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "overrides": {
-    "has": "npm:@nolyfill/has@latest"
+  "devDependencies": {
+    "@eslint-sukka/node": "^5.0.0",
+    "@eslint-sukka/ts": "^5.0.0",
+    "@types/async-retry": "^1.4.8",
+    "@types/bun": "^1.0.2",
+    "eslint": "^8.56.0",
+    "eslint-config-sukka": "^5.0.0",
+    "typescript": "^5.3.3"
   }
 }

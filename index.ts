@@ -1,7 +1,6 @@
-// @ts-check
-const fs = require('fs');
-const retry = require('async-retry');
-const path = require('path');
+import fs from 'fs';
+import retry from 'async-retry';
+import path from 'path';
 
 const baseUrl = new URL('https://github-readme-stats.vercel.app/api');
 baseUrl.searchParams.set('username', 'sukkaw');
@@ -10,7 +9,7 @@ baseUrl.searchParams.set('hide_border', 'true');
 baseUrl.searchParams.set('include_all_commits', 'true');
 baseUrl.searchParams.set('hide_title', 'true');
 baseUrl.searchParams.set('count_private', 'true');
-baseUrl.searchParams.set('show', 'reviews', /** reviews,discussions_started,discussions_answered */);
+baseUrl.searchParams.set('show', 'reviews' /** reviews,discussions_started,discussions_answered */);
 
 const lightUrl = new URL(baseUrl);
 lightUrl.searchParams.set('icon_color', '586069');
@@ -22,10 +21,7 @@ darkUrl.searchParams.set('title_color', '8d939d');
 darkUrl.searchParams.set('bg_color', '1f2228');
 darkUrl.searchParams.set('text_color', '8d939d');
 
-/**
- * @param {URL} url
- */
-const fetchSvg = async (url) => {
+const fetchSvg = async (url: URL) => {
   const random = Math.random().toString(36).slice(2);
   url.searchParams.set('_cache_busting', random);
 
@@ -37,11 +33,11 @@ const fetchSvg = async (url) => {
     });
 
   if (svg.includes('went wrong') || svg.includes('file an issue') || svg.includes('>0</text>')) {
-    console.log('[GitHub README Stats Error]', url.href)
+    console.log('[GitHub README Stats Error]', url.href);
     throw new Error('Failed to fetch');
   }
   return svg;
-}
+};
 
 const publicDir = path.resolve(__dirname, 'public');
 
@@ -49,13 +45,12 @@ const publicDir = path.resolve(__dirname, 'public');
   try {
     const [light, dark] = await Promise.all([
       retry(() => fetchSvg(lightUrl), { retries: 10 }),
-      retry(() => fetchSvg(darkUrl), { retries: 10 }),
-      fs.promises.mkdir(publicDir, { recursive: true })
+      retry(() => fetchSvg(darkUrl), { retries: 10 })
     ]);
 
     await Promise.all([
-      fs.promises.writeFile(path.resolve(publicDir, 'light.svg'), light, { encoding: 'utf-8' }),
-      fs.promises.writeFile(path.resolve(publicDir, 'dark.svg'), dark, { encoding: 'utf-8' })
+      Bun.write(path.resolve(publicDir, 'light.svg'), light),
+      Bun.write(path.resolve(publicDir, 'dark.svg'), dark)
     ]);
   } catch (e) {
     console.error(e);
