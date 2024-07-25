@@ -48,10 +48,9 @@ const publicDir = path.resolve(__dirname, 'public');
       retry(() => fetchSvg(darkUrl), { retries: 10 })
     ]);
 
-    await Promise.all([
-      Bun.write(path.resolve(publicDir, 'light.svg'), light),
-      Bun.write(path.resolve(publicDir, 'dark.svg'), dark)
-    ]);
+
+    fs.writeFileSync(path.resolve(publicDir, 'light.svg'), light);
+    fs.writeFileSync(path.resolve(publicDir, 'dark.svg'), dark);
   } catch (e) {
     console.error(e);
     process.exit(1);

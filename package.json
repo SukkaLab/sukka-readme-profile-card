@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "download": "bun run index.ts"
+    "download": "node -r @swc-node/register index.ts"
   },
   "author": "",
   "dependencies": {
@@ -14,10 +14,13 @@
   "devDependencies": {
     "@eslint-sukka/node": "^5.1.2",
     "@eslint-sukka/ts": "^5.1.2",
+    "@swc-node/register": "^1.10.9",
+    "@swc/core": "^1.7.1",
     "@types/async-retry": "^1.4.8",
-    "@types/bun": "^1.0.12",
+    "@types/node": "^20.14.12",
     "eslint": "^8.56.0",
     "eslint-config-sukka": "^5.1.2",
     "typescript": "^5.4.5"
-  }
+  },
+  "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e"
 }
