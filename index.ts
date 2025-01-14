@@ -1,6 +1,8 @@
 import fs from 'fs';
 import retry from 'async-retry';
 import path from 'path';
+import { githubSukka } from './github-stats-json';
+import { nullthrow } from 'foxts/guard';
 
 const baseUrl = new URL('https://github-readme-stats.vercel.app/api');
 baseUrl.searchParams.set('username', 'sukkaw');
@@ -43,11 +45,15 @@ const publicDir = path.resolve(__dirname, 'public');
 
 (async () => {
   try {
+    const pat = nullthrow(process.env.GITHUB_TOKEN);
+    const githubStats = await retry(() => githubSukka(pat), { retries: 10 });
+
+    fs.writeFileSync(path.resolve(publicDir, 'github-stats.json'), JSON.stringify(githubStats));
+
     const [light, dark] = await Promise.all([
       retry(() => fetchSvg(lightUrl), { retries: 10 }),
       retry(() => fetchSvg(darkUrl), { retries: 10 })
     ]);
-
 
     fs.writeFileSync(path.resolve(publicDir, 'light.svg'), light);
     fs.writeFileSync(path.resolve(publicDir, 'dark.svg'), dark);
