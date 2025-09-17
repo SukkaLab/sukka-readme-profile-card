@@ -15,6 +15,10 @@ baseUrl.searchParams.set('count_private', 'true');
 baseUrl.searchParams.set('rank_icon', 'percentile');
 baseUrl.searchParams.set('show', 'reviews,prs_merged' /** reviews,discussions_started,discussions_answered */);
 
+if (process.env.CARD_INSTANCE_DOMAIN) {
+  baseUrl.hostname = process.env.CARD_INSTANCE_DOMAIN;
+}
+
 const lightUrl = new URL(baseUrl);
 lightUrl.searchParams.set('icon_color', '586069');
 lightUrl.searchParams.set('title_color', '60696f');
@@ -32,15 +36,15 @@ async function fetchSvg(url: URL) {
   const svg = await fetch(url, { signal: AbortSignal.timeout(10 * 1000) })
     .then(r => r.text())
     .catch(e => {
-      console.log('[GitHub README Stats Error] fetch failed', url.href, e);
+      console.log('[GitHub README Stats Error] fetch failed', url.pathname + url.search, e);
       throw e;
     });
 
   if (svg.includes('went wrong') || svg.includes('file an issue') || svg.includes('rate limit')) {
-    console.log('[GitHub README Stats Error] Backend issue', url.href, svg);
+    console.log('[GitHub README Stats Error] Backend issue', url.pathname + url.search, svg);
     throw new Error('Failed to fetch');
   } else if (svg.includes('>0</text>')) {
-    console.log('[GitHub README Stats Error] Some 0 value', url.href, svg);
+    console.log('[GitHub README Stats Error] Some 0 value', url.pathname + url.search, svg);
     throw new Error('Failed to fetch');
   }
   return svg;
