@@ -1,38 +1,42 @@
-// query userInfo($login: String!) {
-//   user(login: $login) {
-//     name
-//     login
-//     contributionsCollection {
-//       restrictedContributionsCount
-//     }
-//     repositoriesContributedTo(first: 1, contributionTypes: [COMMIT, ISSUE, PULL_REQUEST, REPOSITORY]) {
-//       totalCount
-//     }
-//     pullRequests(first: 1) {
-//       totalCount
-//     }
-//     openIssues: issues(states: OPEN) {
-//       totalCount
-//     }
-//     closedIssues: issues(states: CLOSED) {
-//       totalCount
-//     }
-//     followers {
-//       totalCount
-//     }
-//     repositories(first: 100, ownerAffiliations: OWNER, orderBy: {direction: DESC, field: STARGAZERS}) {
-//       totalCount
-//       nodes {
-//         stargazers {
-//           totalCount
-//         }
-//         forks {
-//           totalCount
-//         }
-//       }
-//     }
-//   }
-// }
+import { tagged as gql } from 'foxts/tagged';
+
+const query = gql`
+    query userInfo($login: String!) {
+      user(login: $login) {
+        name
+        login
+        contributionsCollection {
+          restrictedContributionsCount
+        }
+        repositoriesContributedTo(first: 1, contributionTypes: [COMMIT, ISSUE, PULL_REQUEST, REPOSITORY]) {
+          totalCount
+        }
+        pullRequests(first: 1) {
+          totalCount
+        }
+        openIssues: issues(states: OPEN) {
+          totalCount
+        }
+        closedIssues: issues(states: CLOSED) {
+          totalCount
+        }
+        followers {
+          totalCount
+        }
+        repositories(first: 100, ownerAffiliations: OWNER, orderBy: {direction: DESC, field: STARGAZERS}) {
+          totalCount
+          nodes {
+            stargazers {
+              totalCount
+            }
+            forks {
+              totalCount
+            }
+          }
+        }
+      }
+  }
+`;
 
 function fetcher(ghPAT: string) {
   return fetch(
@@ -47,7 +51,7 @@ function fetcher(ghPAT: string) {
         variables: {
           login: 'sukkaw'
         },
-        query: 'query userInfo($login:String!){user(login:$login){name login contributionsCollection{restrictedContributionsCount}repositoriesContributedTo(first:1,contributionTypes:[COMMIT,ISSUE,PULL_REQUEST,REPOSITORY]){totalCount}pullRequests(first:1){totalCount}openIssues:issues(states:OPEN){totalCount}closedIssues:issues(states:CLOSED){totalCount}followers{totalCount}repositories(first:100,ownerAffiliations:OWNER,orderBy:{direction:DESC,field:STARGAZERS}){totalCount nodes{stargazers{totalCount}forks{totalCount}}}}}'
+        query
       })
     }
   );

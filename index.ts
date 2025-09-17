@@ -1,6 +1,7 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import retry from 'async-retry';
-import path from 'path';
+import path from 'node:path';
+import process from 'node:process';
 import { githubSukka } from './github-stats-json';
 import { nullthrow } from 'foxts/guard';
 
@@ -23,7 +24,7 @@ darkUrl.searchParams.set('title_color', '8d939d');
 darkUrl.searchParams.set('bg_color', '1f2228');
 darkUrl.searchParams.set('text_color', '8d939d');
 
-const fetchSvg = async (url: URL) => {
+async function fetchSvg(url: URL) {
   const random = Math.random().toString(36).slice(2);
   url.searchParams.set('_cache_busting', random);
 
@@ -39,7 +40,7 @@ const fetchSvg = async (url: URL) => {
     throw new Error('Failed to fetch');
   }
   return svg;
-};
+}
 
 const publicDir = path.resolve(__dirname, 'public');
 
