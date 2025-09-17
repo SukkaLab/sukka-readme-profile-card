@@ -35,8 +35,11 @@ async function fetchSvg(url: URL) {
       throw e;
     });
 
-  if (svg.includes('went wrong') || svg.includes('file an issue') || svg.includes('>0</text>')) {
-    console.log('[GitHub README Stats Error]', url.href);
+  if (svg.includes('went wrong') || svg.includes('file an issue')) {
+    console.log('[GitHub README Stats Error] Backend issue', url.href, svg);
+    throw new Error('Failed to fetch');
+  } else if (svg.includes('>0</text>')) {
+    console.log('[GitHub README Stats Error] Some 0 value', url.href, svg);
     throw new Error('Failed to fetch');
   }
   return svg;
