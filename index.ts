@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import retry from 'async-retry';
+import { asyncRetry as retry } from 'foxts/async-retry';
 import path from 'node:path';
 import process from 'node:process';
 import { githubSukka } from './github-stats-json';
