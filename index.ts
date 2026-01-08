@@ -29,7 +29,7 @@ const publicDir = path.resolve(__dirname, 'public');
 
 (async () => {
   try {
-    const pat = nullthrow(process.env.GITHUB_TOKEN);
+    const pat = nullthrow(process.env.PAT_1);
     const githubStats = await retry(() => githubSukka(pat), { retries: 10 });
 
     fs.writeFileSync(path.resolve(publicDir, 'github-stats.json'), JSON.stringify(githubStats));

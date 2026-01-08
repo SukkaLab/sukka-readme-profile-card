@@ -32,7 +32,7 @@ jobs:
       - run: pnpm i
       - run: pnpm run download
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PAT_1: ${{ secrets.PAT_1 }}
       # base options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged
       # light options: icon_color=586069&title_color=60696f
       # dark options: icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
@@ -42,14 +42,14 @@ jobs:
           card: stats
           options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=586069&title_color=60696f
           path: public/light.svg
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_1 }}
       - name: Generate dark stats card
         uses: readme-tools/github-readme-stats-action@v1
         with:
           card: stats
           options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
           path: public/dark.svg
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_1 }}
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
