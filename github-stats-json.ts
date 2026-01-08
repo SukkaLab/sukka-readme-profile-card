@@ -14,6 +14,9 @@ const query = gql`
         pullRequests(first: 1) {
           totalCount
         }
+        pullRequestsMerged: pullRequests(states: MERGED, first: 1) {
+          totalCount
+        }
         openIssues: issues(states: OPEN) {
           totalCount
         }
@@ -70,6 +73,7 @@ function fetcherTotalCommit(ghPAT: string) {
 export async function githubSukka(ghPAT: string) {
   const stats = {
     totalPRs: 'N/A',
+    totalMergedPRs: 'N/A',
     followers: 'N/A',
     totalCommits: 'N/A',
     totalIssues: 'N/A',
@@ -95,6 +99,7 @@ export async function githubSukka(ghPAT: string) {
       stats.totalIssues = statData.openIssues.totalCount + statData.closedIssues.totalCount;
       stats.followers = statData.followers.totalCount;
       stats.totalPRs = statData.pullRequests.totalCount;
+      stats.totalMergedPRs = statData.pullRequestsMerged.totalCount;
       stats.contributedTo = statData.repositoriesContributedTo.totalCount;
       stats.totalStars = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.stargazers.totalCount, 0);
       stats.totalForks = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.forks.totalCount, 0);
