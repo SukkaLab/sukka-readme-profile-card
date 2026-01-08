@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: 0,42 * * * *
+    - cron: 13,42 * * * *
 
   workflow_dispatch:
 
@@ -33,7 +33,23 @@ jobs:
       - run: pnpm run download
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CARD_INSTANCE_DOMAIN: ${{ secrets.CARD_INSTANCE_DOMAIN }}
+      # base options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged
+      # light options: icon_color=586069&title_color=60696f
+      # dark options: icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
+      - name: Generate light stats card
+        uses: readme-tools/github-readme-stats-action@v1
+        with:
+          card: stats
+          options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=586069&title_color=60696f
+          path: public/light.svg
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate dark stats card
+        uses: readme-tools/github-readme-stats-action@v1
+        with:
+          card: stats
+          options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
+          path: public/dark.svg
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
