@@ -2,21 +2,19 @@
   "compilerOptions": {
     "composite": true,
     "target": "esnext",
-    "moduleDetection": "force",
-    "module": "esnext",
+    "module": "preserve",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "allowJs": true,
     "noEmit": true,
-    "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "strictNullChecks": true,
     "skipLibCheck": true
   },
   "include": [
     "./index.ts",
     "./github-stats-json.ts"
-  ]
+  ],
+  "exclude": ["node_modules"]
 }
