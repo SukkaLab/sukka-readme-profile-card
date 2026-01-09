@@ -1,7 +1,8 @@
+import { appendArrayInPlace } from 'foxts/append-array-in-place';
 import { tagged as gql } from 'foxts/tagged';
 
 const query = gql`
-    query userInfo($login: String!) {
+  query userInfo($login: String!, $repoAfter: String) {
       user(login: $login) {
         name
         login
@@ -26,8 +27,12 @@ const query = gql`
         followers {
           totalCount
         }
-        repositories(first: 100, ownerAffiliations: OWNER, orderBy: {direction: DESC, field: STARGAZERS}) {
+        repositories(first: 100, after: $repoAfter, ownerAffiliations: OWNER, orderBy: {direction: DESC, field: STARGAZERS}) {
           totalCount
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
           nodes {
             stargazers {
               totalCount
@@ -41,7 +46,7 @@ const query = gql`
   }
 `;
 
-function fetcher(ghPAT: string) {
+function fetcher(ghPAT: string, repoCursor?: string) {
   return fetch(
     'https://api.github.com/graphql',
     {
@@ -52,7 +57,8 @@ function fetcher(ghPAT: string) {
       },
       body: JSON.stringify({
         variables: {
-          login: 'sukkaw'
+          login: 'sukkaw',
+          repoAfter: repoCursor || null
         },
         query
       })
@@ -85,30 +91,38 @@ export async function githubSukka(ghPAT: string) {
   const [statDataResp, totalCommitData] = await Promise.all([
     fetcher(ghPAT).then((res) => {
       if (res.ok) return res.json();
-      return null;
+      throw new Error(`GitHub GraphQL API responded with status ${res.status}`);
     }),
     fetcherTotalCommit(ghPAT).then((res) => {
       if (res.ok) return res.json();
-      return null;
+      throw new Error(`GitHub Search API responded with status ${res.status}`);
     })
   ]);
 
-  try {
-    if (statDataResp) {
-      const statData = (statDataResp).data.user;
-      stats.totalIssues = statData.openIssues.totalCount + statData.closedIssues.totalCount;
-      stats.followers = statData.followers.totalCount;
-      stats.totalPRs = statData.pullRequests.totalCount;
-      stats.totalMergedPRs = statData.pullRequestsMerged.totalCount;
-      stats.contributedTo = statData.repositoriesContributedTo.totalCount;
-      stats.totalStars = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.stargazers.totalCount, 0);
-      stats.totalForks = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.forks.totalCount, 0);
-      if (totalCommitData) {
-        stats.totalCommits = (totalCommitData).total_count + statData.contributionsCollection.restrictedContributionsCount;
+  if (statDataResp) {
+    const statData = (statDataResp).data.user;
+    // If there is a next page of repositories, fetch one more page to count up to ~200 repos
+    const repos = statData.repositories;
+    if (repos.pageInfo?.hasNextPage && repos.nodes.length < 200) {
+      const nextResp = await fetcher(ghPAT, repos.pageInfo.endCursor).then((res) => {
+        if (res.ok) return res.json();
+        return null;
+      });
+      if (nextResp?.data?.user?.repositories) {
+        appendArrayInPlace(statData.repositories.nodes, nextResp.data.user.repositories.nodes);
       }
     }
-  } catch (e) {
-    console.log(e);
+
+    stats.totalIssues = statData.openIssues.totalCount + statData.closedIssues.totalCount;
+    stats.followers = statData.followers.totalCount;
+    stats.totalPRs = statData.pullRequests.totalCount;
+    stats.totalMergedPRs = statData.pullRequestsMerged.totalCount;
+    stats.contributedTo = statData.repositoriesContributedTo.totalCount;
+    stats.totalStars = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.stargazers.totalCount, 0);
+    stats.totalForks = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.forks.totalCount, 0);
+    if (totalCommitData) {
+      stats.totalCommits = (totalCommitData).total_count + statData.contributionsCollection.restrictedContributionsCount;
+    }
   }
 
   return stats;
