@@ -4,6 +4,7 @@
     "target": "esnext",
     "module": "preserve",
     "moduleResolution": "bundler",
+    "types": ["node"],
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
