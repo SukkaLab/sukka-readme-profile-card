@@ -9,9 +9,6 @@ const query = gql`
         contributionsCollection {
           restrictedContributionsCount
         }
-        repositoriesContributedTo(first: 1, contributionTypes: [COMMIT, ISSUE, PULL_REQUEST, REPOSITORY]) {
-          totalCount
-        }
         pullRequests(first: 1) {
           totalCount
         }
@@ -46,7 +43,20 @@ const query = gql`
   }
 `;
 
-function fetcher(ghPAT: string, repoCursor?: string) {
+// "repositoriesContributedTo" is expensive to resolve and trips GitHub's
+// RESOURCE_LIMITS_EXCEEDED when combined with other queries, so it lives
+// in its own request.
+const contributedToQuery = gql`
+  query contributedTo($login: String!) {
+      user(login: $login) {
+        repositoriesContributedTo(first: 1, contributionTypes: [COMMIT, ISSUE, PULL_REQUEST, REPOSITORY]) {
+          totalCount
+        }
+      }
+  }
+`;
+
+function graphql(ghPAT: string, query: string, variables: Record<string, string | null>) {
   return fetch(
     'https://api.github.com/graphql',
     {
@@ -55,15 +65,20 @@ function fetcher(ghPAT: string, repoCursor?: string) {
         Authorization: `Bearer ${ghPAT}`,
         'User-Agent': 'Sukka API - Fetch My GitHub User Info'
       },
-      body: JSON.stringify({
-        variables: {
-          login: 'sukkaw',
-          repoAfter: repoCursor || null
-        },
-        query
-      })
+      body: JSON.stringify({ variables, query })
     }
   );
+}
+
+function fetcher(ghPAT: string, repoCursor?: string) {
+  return graphql(ghPAT, query, {
+    login: 'sukkaw',
+    repoAfter: repoCursor || null
+  });
+}
+
+function fetcherContributedTo(ghPAT: string) {
+  return graphql(ghPAT, contributedToQuery, { login: 'sukkaw' });
 }
 
 function fetcherTotalCommit(ghPAT: string) {
@@ -88,10 +103,14 @@ export async function githubSukka(ghPAT: string) {
     contributedTo: 'N/A'
   };
 
-  const [statDataResp, totalCommitData] = await Promise.all([
+  const [statDataResp, contributedToResp, totalCommitData] = await Promise.all([
     fetcher(ghPAT).then((res) => {
       if (res.ok) return res.json();
       throw new Error(`GitHub GraphQL API responded with status ${res.status}`);
+    }),
+    fetcherContributedTo(ghPAT).then((res) => {
+      if (res.ok) return res.json();
+      return null;
     }),
     fetcherTotalCommit(ghPAT).then((res) => {
       if (res.ok) return res.json();
@@ -99,8 +118,12 @@ export async function githubSukka(ghPAT: string) {
     })
   ]);
 
-  if (statDataResp) {
-    const statData = (statDataResp).data.user;
+  if (statDataResp?.errors) {
+    console.error({ errors: JSON.stringify(statDataResp.errors, null, 2) });
+  }
+
+  const statData = statDataResp?.data?.user;
+  if (statData) {
     // If there is a next page of repositories, fetch one more page to count up to ~200 repos
     const repos = statData.repositories;
     if (repos.pageInfo?.hasNextPage && repos.nodes.length < 200) {
@@ -117,7 +140,7 @@ export async function githubSukka(ghPAT: string) {
     stats.followers = statData.followers.totalCount;
     stats.totalPRs = statData.pullRequests.totalCount;
     stats.totalMergedPRs = statData.pullRequestsMerged.totalCount;
-    stats.contributedTo = statData.repositoriesContributedTo.totalCount;
+    stats.contributedTo = contributedToResp?.data?.user?.repositoriesContributedTo?.totalCount ?? 'N/A';
     stats.totalStars = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.stargazers.totalCount, 0);
     stats.totalForks = statData.repositories.nodes.reduce((prev: number, curr: any) => prev + curr.forks.totalCount, 0);
     if (totalCommitData) {
