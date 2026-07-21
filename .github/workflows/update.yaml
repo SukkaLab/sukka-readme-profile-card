@@ -22,14 +22,19 @@ jobs:
         with:
           persist-credentials: false
       - uses: pnpm/action-setup@v6
+        id: setup_pnpm
+        background: true
         with:
           run_install: false
           cache: true
       - uses: actions/setup-node@v6
+        id: setup_node
+        background: true
         with:
           node-version-file: ".node-version"
           check-latest: true
           package-manager-cache: false
+      - wait: [setup_node, setup_pnpm]
       - run: pnpm config set --location=global minimumReleaseAge 0
       - run: pnpm i
       - run: pnpm run download
