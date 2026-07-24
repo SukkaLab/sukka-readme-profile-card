@@ -84,6 +84,10 @@ jobs:
         env:
           PAT_1: ${{ secrets.PAT_1 }}
       - wait: [download_stats_cards]
+      - uses: GeekyEggo/delete-artifact@v6
+        background: true
+        with:
+          name: dist
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -91,7 +95,3 @@ jobs:
           keep_files: true
           force_orphan: true
           publish_branch: dist
-      - uses: GeekyEggo/delete-artifact@v6
-        background: true
-        with:
-          name: dist
