@@ -11,8 +11,45 @@ permissions:
   contents: write
 
 jobs:
-  fetch:
-    name: Fetch stats card img
+  stats:
+    name: Generate stats card img
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # base options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged
+      # light options: icon_color=586069&title_color=60696f
+      # dark options: icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
+      - name: Generate light stats card
+        uses: readme-tools/github-readme-stats-action@v1
+        with:
+          card: stats
+          options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=586069&title_color=60696f
+          path: public/light.svg
+          token: ${{ secrets.PAT_1 }}
+      - name: Generate dark stats card
+        uses: readme-tools/github-readme-stats-action@v1
+        with:
+          card: stats
+          options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
+          path: public/dark.svg
+          token: ${{ secrets.PAT_1 }}
+      - name: Upload site distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            public/light.svg
+            public/dark.svg
+          if-no-files-found: error
+
+  download:
+    name: Download profile data
+    needs: stats
     runs-on: ubuntu-slim
     permissions:
       contents: write
@@ -34,29 +71,19 @@ jobs:
           node-version-file: ".node-version"
           check-latest: true
           package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        id: download_stats_cards
+        background: true
+        with:
+          name: dist
+          path: public
       - wait: [setup_node, setup_pnpm]
       - run: pnpm config set --location=global minimumReleaseAge 0
       - run: pnpm i
       - run: pnpm run download
         env:
           PAT_1: ${{ secrets.PAT_1 }}
-      # base options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged
-      # light options: icon_color=586069&title_color=60696f
-      # dark options: icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
-      - name: Generate light stats card
-        uses: readme-tools/github-readme-stats-action@v1
-        with:
-          card: stats
-          options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=586069&title_color=60696f
-          path: public/light.svg
-          token: ${{ secrets.PAT_1 }}
-      - name: Generate dark stats card
-        uses: readme-tools/github-readme-stats-action@v1
-        with:
-          card: stats
-          options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
-          path: public/dark.svg
-          token: ${{ secrets.PAT_1 }}
+      - wait: [download_stats_cards]
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -64,3 +91,7 @@ jobs:
           keep_files: true
           force_orphan: true
           publish_branch: dist
+      - uses: GeekyEggo/delete-artifact@v6
+        background: true
+        with:
+          name: dist
