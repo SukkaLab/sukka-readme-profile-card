@@ -84,6 +84,18 @@ jobs:
         env:
           PAT_1: ${{ secrets.PAT_1 }}
       - wait: [download_stats_cards]
+      - name: Validate stats cards
+        run: |
+          for card in public/light.svg public/dark.svg; do
+            if [ ! -s "$card" ]; then
+              echo "::error file=$card::Stats card is missing or empty"
+              exit 1
+            fi
+            if grep -Fq 'Something went wrong' "$card"; then
+              echo "::error file=$card::Stats card contains 'Something went wrong'"
+              exit 1
+            fi
+          done
       - uses: GeekyEggo/delete-artifact@v6
         with:
           name: dist
