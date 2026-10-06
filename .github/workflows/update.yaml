@@ -31,6 +31,17 @@ jobs:
           options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=586069&title_color=60696f
           path: public/light.svg
           token: ${{ secrets.PAT_1 }}
+      - name: Validate light stats card
+        run: |
+          card=public/light.svg
+          if [ ! -s "$card" ]; then
+            echo "::error file=$card::Stats card is missing or empty"
+            exit 1
+          fi
+          if grep -Fq 'Something went wrong' "$card"; then
+            echo "::error file=$card::Stats card contains 'Something went wrong'"
+            exit 1
+          fi
       - name: Generate dark stats card
         uses: readme-tools/github-readme-stats-action@v1
         with:
@@ -38,6 +49,17 @@ jobs:
           options: username=sukkaw&show_icons=true&hide_border=true&include_all_commits=true&hide_title=true&count_private=true&rank_icon=percentile&show=reviews,prs_merged&icon_color=60696f&title_color=8d939d&bg_color=1f2228&text_color=8d939d
           path: public/dark.svg
           token: ${{ secrets.PAT_1 }}
+      - name: Validate dark stats card
+        run: |
+          card=public/dark.svg
+          if [ ! -s "$card" ]; then
+            echo "::error file=$card::Stats card is missing or empty"
+            exit 1
+          fi
+          if grep -Fq 'Something went wrong' "$card"; then
+            echo "::error file=$card::Stats card contains 'Something went wrong'"
+            exit 1
+          fi
       - name: Upload site distribution
         uses: actions/upload-artifact@v4
         with:
@@ -84,18 +106,6 @@ jobs:
         env:
           PAT_1: ${{ secrets.PAT_1 }}
       - wait: [download_stats_cards]
-      - name: Validate stats cards
-        run: |
-          for card in public/light.svg public/dark.svg; do
-            if [ ! -s "$card" ]; then
-              echo "::error file=$card::Stats card is missing or empty"
-              exit 1
-            fi
-            if grep -Fq 'Something went wrong' "$card"; then
-              echo "::error file=$card::Stats card contains 'Something went wrong'"
-              exit 1
-            fi
-          done
       - uses: GeekyEggo/delete-artifact@v6
         with:
           name: dist
